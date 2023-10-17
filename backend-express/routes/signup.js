@@ -1,11 +1,8 @@
 import express from "express";
 import userModel from "../models/user.models.js";
 import { jwt_token } from "../libs/jwt.js";
-import cors from 'cors'
 
 const router = express.Router();
-
-router.use(express.json());
 
 router.post("/", async (req, res, next) => {
   const responseJson = {

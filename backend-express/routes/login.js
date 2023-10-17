@@ -5,10 +5,7 @@ import { comparePassword } from "../utils/auth.js";
 
 const router = express.Router();
 
-router.use(express.json());
-
 router.post("/", async (req, res, next) => {
-//  lle.log(req.body)
   try {
     if (!req.body) {
       return res.json({ success: false, error: "body is undefined" });

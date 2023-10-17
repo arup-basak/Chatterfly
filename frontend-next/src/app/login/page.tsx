@@ -5,10 +5,12 @@ import { Button, TextField, Flex, Container } from '@radix-ui/themes';
 import axios from 'axios';
 import LoginInterface from '@/interface/login.interface';
 import { saveLoginCookie } from './action'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
   const [user, setUser] = useState<string>("")
   const [password, setPassword] = useState<string>("")
+  const { push } = useRouter()
 
   const handleForgetPasswordClick = () => {
 
@@ -26,6 +28,7 @@ const Page = () => {
     const jsonData = response.data as LoginInterface;
     saveLoginCookie(jsonData).then(() => {
       console.log("saved")
+      push('/')
     })
   }
 
