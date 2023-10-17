@@ -15,7 +15,11 @@ const server = app.listen(PORT, () => {
     console.log(`Express server is running on port ${PORT}`);
 });
 
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000"
+    }
+});
 app.get('/', (req, res) => {
     res.send("Hello WOrld")
 })

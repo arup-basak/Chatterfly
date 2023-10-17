@@ -8,25 +8,27 @@ const router = express.Router();
 router.use(express.json());
 
 router.post("/", async (req, res, next) => {
+//  lle.log(req.body)
   try {
     if (!req.body) {
-      return res.status(400).json({ success: false, error: "body is undefined" });
+      return res.json({ success: false, error: "body is undefined" });
     }
 
     const { user, email, password } = req.body;
     const existingUser = await userModel.findOne({ user: user });
 
     if (!existingUser) {
-      return res.status(404).json({ success: false, error: "User Not Found" });
+      return res.json({ success: false, error: "User Not Found" });
     }
 
     const passwordMatch = await comparePassword(password, existingUser.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ success: false, error: "Password is Incorrect" });
+      return res.json({ success: false, error: "Password is Incorrect" });
     }
 
     const token = jwt_token(user, email);
+//    console.log(token)
 
     return res.status(200).json({
       success: true,
@@ -40,5 +42,10 @@ router.post("/", async (req, res, next) => {
     return next(error);
   }
 });
+
+
+router.get('/', (req, res) => {
+  res.send("Hello World")
+})
 
 export default router;

@@ -3,3 +3,7 @@
 
 # Environmental Files
 .env
+
+# code editor
+/.vscode
+/.fleet

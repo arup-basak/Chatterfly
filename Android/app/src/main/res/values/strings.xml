@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">ChatApp</string>
-    <string name="server_url">http://172.17.0.1:3000</string>
+    <string name="server_url">http://172.17.0.1:3001</string>
     <string name="title_activity_chat">ChatActivity</string>
     <string name="jwt_token_key">JWT_KEY_MAIN_ACTIVITY</string>
     <string name="title_activity_home">HomeActivity</string>

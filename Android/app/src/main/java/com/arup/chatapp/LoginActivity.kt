@@ -31,10 +31,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arup.chatapp.models.LoginModel
+import com.arup.chatapp.models.LoginRequestModel
 import com.arup.chatapp.services.NetworkService
 import com.arup.chatapp.ui.theme.ChatAppTheme
 import com.google.gson.Gson
 import io.socket.client.Socket
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 private var mSocket: Socket? = null
 private val LOG_TAG = "MainActivityMessage"
@@ -62,6 +69,10 @@ fun Screen(context: Context) {
     }
 
     var passwordValue by remember {
+        mutableStateOf("")
+    }
+
+    var emailValue by remember {
         mutableStateOf("")
     }
 
@@ -97,6 +108,17 @@ fun Screen(context: Context) {
             )
 
             TextField(
+                value = emailValue,
+                onValueChange = {
+                    emailValue = it
+                },
+                label = { Text("Email") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp)
+            )
+
+            TextField(
                 value = passwordValue,
                 onValueChange = {
                     passwordValue = it
@@ -109,7 +131,13 @@ fun Screen(context: Context) {
 
             Button(
                 onClick = {
-                    context.startActivity(Intent(context, HomeActivity::class.java))
+                    signInRequest(
+                        context,
+                        nameValue,
+                        emailValue,
+                        passwordValue
+                    )
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,20 +149,52 @@ fun Screen(context: Context) {
     }
 }
 
-suspend fun signInRequest(context: Context, username: String, password: String): LoginData? {
-    try {
-        val networkService = NetworkService()
-        val map = mapOf(
-            "user" to username,
-            "password" to password
-        )
-        val response = networkService.login(context.getString(R.string.server_url), gson.toJson(map))
-        return gson.fromJson(response, LoginData::class.java)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return null
-    }
+private fun signInRequest(
+    context: Context,
+    username: String,
+    email: String,
+    password: String
+) {
+    val retrofitAPI = createRetrofitAPI(context)
+    val call = retrofitAPI.loginData(LoginRequestModel(username, email, password))
+    call.enqueue(object : Callback<LoginModel?> {
+        override fun onResponse(call: Call<LoginModel?>, response: Response<LoginModel?>) {
+            if (response.isSuccessful) {
+                Log.d(LOG_TAG, response.body().toString())
+            } else {
+                Log.d(LOG_TAG, "RESPONSE ERROR " + response.raw().toString())
+            }
+        }
+
+        override fun onFailure(call: Call<LoginModel?>, t: Throwable) {
+            Log.d(LOG_TAG, t.message.toString())
+        }
+    })
 }
+
+private fun createRetrofitAPI(context: Context): RetrofitAPI {
+    val retrofit = Retrofit.Builder()
+        .baseUrl(context.getString(R.string.server_url))
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    return retrofit.create(RetrofitAPI::class.java)
+}
+
+
+//suspend fun signInRequest(context: Context, username: String, password: String): LoginData? {
+//    try {
+//        val networkService = NetworkService()
+//        val map = mapOf(
+//            "user" to username,
+//            "password" to password
+//        )
+//        val response = networkService.login(context.getString(R.string.server_url), gson.toJson(map))
+//        return gson.fromJson(response, LoginData::class.java)
+//    } catch (e: Exception) {
+//        e.printStackTrace()
+//        return null
+//    }
+//}
 
 //suspend fun signInRequest(
 //    activity: Activity,

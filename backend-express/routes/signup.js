@@ -1,6 +1,7 @@
 import express from "express";
 import userModel from "../models/user.models.js";
 import { jwt_token } from "../libs/jwt.js";
+import cors from 'cors'
 
 const router = express.Router();
 

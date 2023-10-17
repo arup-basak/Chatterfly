@@ -1,4 +1,4 @@
-package com.arup.chatapp.sampledata
+package com.arup.chatapp.models
 
 data class LoginModel(
     var success: Boolean,
