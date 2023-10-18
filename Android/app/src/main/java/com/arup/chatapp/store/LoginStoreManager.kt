@@ -9,18 +9,21 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class UserStore(private val context: Context) {
+class LoginStoreManager(private val context: Context) {
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "login_data")
+
     companion object {
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("LOGIN_TOKEN")
-        private val USER_TOKEN_KEY = stringPreferencesKey("user_token")
+        val TOKEN = stringPreferencesKey("TOKEN")
+        val USER_ID = stringPreferencesKey("USER_ID")
     }
 
-    val getAccessToken: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[USER_TOKEN_KEY] ?: ""
-    }
-    suspend fun saveToken(token: String) {
-        context.dataStore.edit { preferences ->
-            preferences[USER_TOKEN_KEY] = token
+    suspend fun saveLoginDataToDataStore(token: String, userId: String) {
+        context.dataStore.edit {
+            it[TOKEN] = token
+            it[USER_ID] = userId
         }
+    }
+    suspend fun clearData() = context.dataStore.edit {
+        it.clear()
     }
 }

@@ -59,6 +59,7 @@ dependencies {
     implementation ("io.socket:socket.io-client:2.0.0")
     implementation("io.ktor:ktor-client-core:1.6.0")
     implementation("io.ktor:ktor-client-android:1.6.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.5.0")

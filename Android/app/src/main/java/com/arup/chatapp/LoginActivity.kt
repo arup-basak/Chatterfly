@@ -1,6 +1,5 @@
 package com.arup.chatapp
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,12 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.dataStore
 import com.arup.chatapp.models.LoginModel
 import com.arup.chatapp.models.LoginRequestModel
 import com.arup.chatapp.services.NetworkService
+import com.arup.chatapp.store.LoginStoreManager
 import com.arup.chatapp.ui.theme.ChatAppTheme
 import com.google.gson.Gson
 import io.socket.client.Socket
+import kotlinx.coroutines.runBlocking
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,6 +50,7 @@ private val gson = Gson()
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         setContent {
             ChatAppTheme {
@@ -157,9 +158,21 @@ private fun signInRequest(
 ) {
     val retrofitAPI = createRetrofitAPI(context)
     val call = retrofitAPI.loginData(LoginRequestModel(username, email, password))
+    val loginStoreManager = LoginStoreManager(context)
     call.enqueue(object : Callback<LoginModel?> {
         override fun onResponse(call: Call<LoginModel?>, response: Response<LoginModel?>) {
             if (response.isSuccessful) {
+                if(response.body()!!.success) {
+                    val token = response.body()!!.data!!.token
+                    val userId = response.body()!!.data!!.userId
+                    runBlocking {
+                        loginStoreManager.saveLoginDataToDataStore(token, userId)
+                    }
+                    context.startActivity(Intent(context, HomeActivity::class.java))
+                }
+                else {
+                    Log.d(LOG_TAG, "REQUEST ERROR " + response.body()!!.error)
+                }
                 Log.d(LOG_TAG, response.body().toString())
             } else {
                 Log.d(LOG_TAG, "RESPONSE ERROR " + response.raw().toString())
@@ -178,85 +191,6 @@ private fun createRetrofitAPI(context: Context): RetrofitAPI {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     return retrofit.create(RetrofitAPI::class.java)
-}
-
-
-//suspend fun signInRequest(context: Context, username: String, password: String): LoginData? {
-//    try {
-//        val networkService = NetworkService()
-//        val map = mapOf(
-//            "user" to username,
-//            "password" to password
-//        )
-//        val response = networkService.login(context.getString(R.string.server_url), gson.toJson(map))
-//        return gson.fromJson(response, LoginData::class.java)
-//    } catch (e: Exception) {
-//        e.printStackTrace()
-//        return null
-//    }
-//}
-
-//suspend fun signInRequest(
-//    activity: Activity,
-//    map: Map<String, String>
-//) {
-//    Log.d(LOG_TAG, map.toString())
-//    var responseData: LoginData? = null
-//    var isLoading = true
-//    val networkService = NetworkService()
-//
-//    try {
-//        val response = networkService
-//            .login(activity.getString(R.string.server_url), gson.toJson(map))
-//        responseData = gson.fromJson(response, LoginData::class.java)
-//        activity.startActivity(Intent(activity, ChatActivity::class.java))
-//    }
-//    catch (e: Exception) {
-//        Log.d(LOG_TAG, e.message.toString())
-//        Toast.makeText(activity, "Some Error to Sending SignIn Request", Toast.LENGTH_SHORT).show()
-//    }
-//}
-
-@Composable
-fun NetworkRequestScreen(activity: Activity, url: String, username: String, email: String, password: String) {
-    var responseData: LoginData? by remember { mutableStateOf(null) }
-    var isLoading by remember { mutableStateOf(true) } // Start with loading state
-
-    val map = mapOf(
-        "user" to username,
-        "email" to email,
-        "password" to password,
-    )
-
-    val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-    val editor = sharedPref.edit()
-
-    LaunchedEffect(key1 = Unit) {
-        try {
-            val networkService = NetworkService()
-            val response = networkService
-                .login(url, gson.toJson(map))
-            responseData = gson.fromJson(response, LoginData::class.java)
-        } catch (e: Exception) {
-            Log.d(LOG_TAG, e.message.toString())
-        } finally {
-            isLoading = false
-        }
-    }
-
-    Column {
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else {
-            if(responseData!!.success) {
-                editor.putString(activity.getString(R.string.jwt_token_key), responseData!!.data!!.token)
-                editor.apply()
-                editor.commit()
-            }
-
-            responseData?.data!!.token?.let { Text(text = it) }
-        }
-    }
 }
 
 @Preview(showBackground = true)
