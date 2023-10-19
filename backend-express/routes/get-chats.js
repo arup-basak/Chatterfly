@@ -1,9 +1,7 @@
 import express from 'express'
 import userModel from '../models/user.models.js';
-import cors from 'cors'
 
 const router = express.Router();
-router.use(cors())
 
 router.post('/', async (req, res, next) => {
     try {

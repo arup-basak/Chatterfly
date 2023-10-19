@@ -1,4 +1,4 @@
-export default interface chatList {
+export default interface ChatList {
     chatId: string,
     users: string[]
 }

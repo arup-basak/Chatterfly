@@ -28,7 +28,7 @@ const Page = () => {
     const jsonData = response.data as LoginInterface;
     saveLoginCookie(jsonData).then(() => {
       console.log("saved")
-      push('/')
+      // push('/')
     })
   }
 

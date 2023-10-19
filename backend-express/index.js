@@ -5,6 +5,7 @@ import loginRouter from './routes/login.js'
 import signupRouter from './routes/signup.js'
 import getChatsRouter from './routes/get-chats.js'
 import cors from 'cors'
+import userModel from './models/user.models.js';
 
 const app = express();
 const PORT = process.env.NODE_ENV === "PRODUCTION" ? 80 : 3001
@@ -32,9 +33,26 @@ app.use("/get-chats", getChatsRouter)
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.onAny((ag) => {
-        console.log(ag)
+    socket.on("add-chat", (value) => {
+        const query = { user: value.userId };
+        const newChat = {
+            chatId: value.chatId,
+            users: []
+        };
+        
+        const updateUserChatList = async () => {
+            try {
+                console.log("updated");
+                const result = await userModel.updateOne(query, { $push: { chatList: newChat } });
+                console.log(result);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        
+        updateUserChatList();        
     })
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });

@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 
 export async function saveLoginCookie(response: LoginInterface) {
     if (!response.success) {
+        console.log(response.error);
         return;
     }
     cookies().set('token', response.data?.token as string);
