@@ -25,7 +25,6 @@ router.post("/", async (req, res, next) => {
     }
 
     const token = jwt_token(user, email);
-//    console.log(token)
 
     return res.status(200).json({
       success: true,

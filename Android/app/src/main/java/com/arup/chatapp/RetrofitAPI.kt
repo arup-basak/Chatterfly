@@ -1,5 +1,7 @@
 package com.arup.chatapp
 
+import com.arup.chatapp.models.ChatRequestModel
+import com.arup.chatapp.models.ChatResponseModel
 import com.arup.chatapp.models.LoginModel
 import com.arup.chatapp.models.LoginRequestModel
 import retrofit2.Call
@@ -11,4 +13,9 @@ interface RetrofitAPI {
     fun loginData(
         @Body loginRequestModel: LoginRequestModel
     ): Call<LoginModel>
+
+    @POST("/get-chats")
+    fun getChats(
+        @Body chatRequestModel: ChatRequestModel
+    ): Call<ChatResponseModel>
 }

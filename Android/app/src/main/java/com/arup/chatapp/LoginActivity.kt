@@ -28,24 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.datastore.dataStore
 import com.arup.chatapp.models.LoginModel
 import com.arup.chatapp.models.LoginRequestModel
-import com.arup.chatapp.services.NetworkService
 import com.arup.chatapp.store.LoginStoreManager
 import com.arup.chatapp.ui.theme.ChatAppTheme
-import com.google.gson.Gson
-import io.socket.client.Socket
+import com.arup.chatapp.utils.createRetrofitAPI
 import kotlinx.coroutines.runBlocking
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-private var mSocket: Socket? = null
-private val LOG_TAG = "MainActivityMessage"
-private val gson = Gson()
+private const val LOG_TAG = "MainActivityMessage"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,10 +69,6 @@ fun Screen(context: Context) {
     var emailValue by remember {
         mutableStateOf("")
     }
-
-    var responseData: LoginData? by remember { mutableStateOf(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    val networkService = NetworkService()
 
     Scaffold(
         topBar = {
@@ -184,15 +173,6 @@ private fun signInRequest(
         }
     })
 }
-
-private fun createRetrofitAPI(context: Context): RetrofitAPI {
-    val retrofit = Retrofit.Builder()
-        .baseUrl(context.getString(R.string.server_url))
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-    return retrofit.create(RetrofitAPI::class.java)
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
