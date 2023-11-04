@@ -15,7 +15,7 @@ interface RetrofitAPI {
     ): Call<LoginModel>
 
     @POST("/get-chats")
-    fun getChats(
+    suspend fun getChats(
         @Body chatRequestModel: ChatRequestModel
-    ): Call<ChatResponseModel>
+    ): ChatResponseModel
 }
